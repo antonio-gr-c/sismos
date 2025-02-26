@@ -136,86 +136,78 @@ Widget build(BuildContext context) {
         );
       } else {
         return Scaffold(
-          body: FlutterMap(
-            mapController: MapController(), // Se agrega el controlador del mapa
-            options: MapOptions(
-              initialCenter: LatLng(0, 0), // Mapa centrado en el mundo
-              initialZoom: 2, // Zoom alejado para ver todos los sismos
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                subdomains: ['a', 'b', 'c'],
-              ),
-
-              // Capa de marcadores
-              MarkerLayer(
-                markers: listaSismos.map((sismo) {
-                  return Marker(
-                    point: LatLng(sismo['latitud'], sismo['longitud']),
-                    width: 40,
-                    height: 40,
-                    child: GestureDetector(
-                      onTap: () {
-                        // Mostrar un AlertDialog con la información del sismo
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              backgroundColor: Colors.grey[900], // Color oscuro
-                              title: Text(
-                                "Sismo detectado",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Magnitud: ${sismo['magnitud']}",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  SizedBox(height: 5),
-                                  Text(
-                                    "Ubicación: ${sismo['ubicacion']}",
-                                    style: TextStyle(color: Colors.white70),
-                                  ),
-                                  SizedBox(height: 5),
-                                  Text(
-                                    "Fecha: ${sismo['fecha']}",
-                                    style: TextStyle(color: Colors.white70),
-                                  ),
-                                ],
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Text("Cerrar", style: TextStyle(color: Colors.blueAccent)),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      child: Icon(
-                        Icons.location_on,
-                        color: sismo['magnitud'] >= 5 ? Colors.red : Colors.amber,
-                        size: 30,
+  body: FlutterMap(
+    mapController: MapController(), // Controlador del mapa
+    options: MapOptions(
+      initialCenter: LatLng(0, 0), // Mapa centrado en el mundo
+      initialZoom: 2, // Zoom inicial
+      minZoom: 2.0, // 🔹 Evita hacer zoom out infinito
+      maxZoom: 18.0, // 🔹 Evita hacer demasiado zoom in
+    ),
+    children: [
+      TileLayer(
+        urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        subdomains: ['a', 'b', 'c'],
+      ),
+      MarkerLayer(
+        markers: listaSismos.map((sismo) {
+          return Marker(
+            point: LatLng(sismo['latitud'], sismo['longitud']),
+            width: 40,
+            height: 40,
+            child: GestureDetector(
+              onTap: () {
+                // Mostrar un AlertDialog con la información del sismo
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      backgroundColor: Colors.grey[900],
+                      title: Text(
+                        "Sismo detectado",
+                        style: TextStyle(color: Colors.white),
                       ),
-                    ),
-                  );
-                }).toList(),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Magnitud: ${sismo['magnitud']}", style: TextStyle(color: Colors.white)),
+                          SizedBox(height: 5),
+                          Text("Ubicación: ${sismo['ubicacion']}", style: TextStyle(color: Colors.white70)),
+                          SizedBox(height: 5),
+                          Text("Fecha: ${sismo['fecha']}", style: TextStyle(color: Colors.white70)),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text("Cerrar", style: TextStyle(color: Colors.blueAccent)),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: Icon(
+                Icons.location_on,
+                color: sismo['magnitud'] >= 5 ? Colors.red : Colors.amber,
+                size: 30,
               ),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: obtenerSismos,
-            backgroundColor: Colors.blueAccent,
-            child: Icon(Icons.map, color: Colors.white),
-          ),
-        );
+            ),
+          );
+        }).toList(),
+      ),
+    ],
+  ),
+  floatingActionButton: FloatingActionButton(
+    onPressed: obtenerSismos,
+    backgroundColor: Colors.blueAccent,
+    child: Icon(Icons.map, color: Colors.white),
+  ),
+);
+
       }
     }
   }
